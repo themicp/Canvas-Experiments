@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>3D Rotating Objects</title>
+        <style type='text/css'>
+            body {
+                margin: 0;
+                background-color: #000;
+            }
+            canvas {
+                display: block;
+                margin: 0 auto 0 auto;
+            }
+            a {
+                color: dodgerblue;
+                text-decoration: none;
+                padding: 5px;
+            }
+            .buttons {
+                width: 140px;
+                margin: 0 auto 0 auto;
+            }
+            span {
+                display: none;
+                color: brown;
+                text-align: center;
+                font-size: 13px;
+            }
+        </style>
+        <script type="text/javascript" src="http://logimus.com/sylvester.js"></script>
+        <script type="text/javascript" src="js/cube.js"></script>
+        <script type="text/javascript" src="js/teapot.js"></script>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    </head>
+    <body>
+        <div class='buttons'>
+            <a href='#' id='cube'>Cube</a>
+            <a href='#' id='teapot' >Teapot</a>
+        </div>
+        <canvas id='canvas' width="500" height="500"></canvas>
+        <div class='buttons'>
+            <a href='#' id='auto'>Automatic</a>
+            <a href='#' id='manual' >Manual</a>
+        </div>
+        <span>TIP: Try giving some rotation speed to the object.<span>
+        <script type='text/javascript'>
+            var canvas = document.getElementById( 'canvas' ), ctx = canvas.getContext( '2d' );
+            ctx.fillStyle='#000000';
+            ctx.fillRect(0,0,500,500);
+            var colors = [ "grey", "brown", "purple", "red", "blue", "white" ], paint;
+            var x, y, draggable, loop, point;
+            var a = {}, b = {}, c = {};
+            var vertices = cube;
+            var indices = cube_ind;
+            var shape = 1;
+            var transform = Matrix.create( [
+                [ 1, 0, 0,    0 ],
+                [ 0, 1, 0,    0 ],
+                [ 0, 0, -0.2, 0 ],
+                [ 0, 0, 2,    1 ]
+            ] );
+            var scale = 200;
+            var anglex = 0, angley = 0;
+            function drawTriangle( ctx, a, b, c, paint ) {
+                ctx.strokeStyle = "white";
+                ctx.fillStyle = ( shape == 1 ) ? colors[ paint ] : "transparent";
+                ctx.beginPath();
+                ctx.moveTo( a[ 0 ] + 250, -a[ 1 ] + 250 );
+                ctx.lineTo( b[ 0 ] + 250, -b[ 1 ] + 250 );
+                ctx.lineTo( c[ 0 ] + 250, -c[ 1 ] + 250 );
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+            function rotateX ( vertices, theta ) {
+                var rotation = Matrix.create( [
+                    [ 1, 0, 0, 0 ],
+                    [ 0, Math.cos( theta ), Math.sin( theta ), 0 ],
+                    [ 0, -Math.sin( theta ), Math.cos( theta ), 0 ],
+                    [ 0, 0, 0, 1 ]
+                ] );
+                return vertices.multiply( rotation );
+            }
+            function rotateY( vertices, theta ) {
+                var rotation = Matrix.create( [
+                    [ Math.cos( theta ), 0, -Math.sin( theta ), 0 ],
+                    [ 0, 1, 0, 0 ],
+                    [ Math.sin( theta ), 0, Math.cos( theta ), 0 ],
+                    [ 0, 0, 0, 1 ]
+                ] );
+                return vertices.multiply( rotation );
+            }
+            function CCW( a, b, c ) {
+                return ( b[ 0 ] - a[ 0 ] ) * ( c[ 1 ] - a[ 1 ] ) - ( b[ 1 ] - a[ 1 ] ) * ( c[ 0 ] - a[ 0 ] );
+            }
+            function init() {
+                ctx.clearRect( 0, 0, 500, 500 );
+                vertices = rotateY( rotateX( vertices, anglex ), angley );
+                vertices1 = vertices.multiply( transform );
+                for ( i = 0; i < vertices.elements.length; ++i ) {
+                    vertices1.elements[ i ][ 0 ] /= vertices1.elements[ i ][ 2 ];
+                    vertices1.elements[ i ][ 1 ] /= vertices1.elements[ i ][ 2 ];
+                    vertices1.elements[ i ][ 0 ] *= scale;
+                    vertices1.elements[ i ][ 1 ] *= scale;
+                }
+                count = 1;
+                paint = 0;
+                for ( i = 0; i < indices.length; ++i ) {
+                    point = vertices1.elements;
+                    a = point[ indices[ i ][ 0 ] ];
+                    b = point[ indices[ i ][ 1 ] ];
+                    c = point[ indices[ i ][ 2 ] ];
+                    if ( count > 2 ) {
+                        ++paint;
+                        count = 1;
+                    }
+                    if ( ( CCW( a, b, c ) > 0 && shape == 0 ) || ( CCW( a, b, c ) < 0 && shape == 1 ) ) {
+                        drawTriangle( ctx, a, b, c, paint );
+                    }
+                    ++count;
+                }
+            }
+            $( canvas ).mousedown( function( e ) {
+                x = e.clientX;
+                y = e.clientY;
+                draggable = true;
+                return false;
+            } );
+            $( document ).mouseup( function( e ) {
+                draggable = false;
+                return false;
+            } );
+            $( document ).mousemove( function( e ) {
+                if ( draggable ) {
+                    angley = 0.01  * ( e.clientX - x );
+                    anglex = 0.01  * ( e.clientY - y );
+                    init();
+                    x = e.clientX;
+                    y = e.clientY;
+                }
+                return false;
+            } );
+            $( "#auto" ).click( function () {
+                angley = 0.005;
+                anglex  = 0.005;
+                loop = setInterval( init, 17 );
+                $( "span" ).show();
+                return false;
+            } );
+            $( "#manual" ).click( function () {
+                clearInterval( loop );
+                $( "span" ).hide();
+                return false;
+            } );
+            $( "#teapot" ).click( function () {
+                transform = Matrix.create( [
+                    [ 1, 0, 0,    0 ],
+                    [ 0, 1, 0,    0 ],
+                    [ 0, 0, -0.2, 0 ],
+                    [ 0, 0, 35,    1 ]
+                ] );
+                vertices = teapot;
+                indices = teapot_ind;
+                scale = 100;
+                shape = 0;
+                init();
+                return false;
+            } );
+            $( "#cube" ).click( function () {
+                transform = Matrix.create( [
+                    [ 1, 0, 0,    0 ],
+                    [ 0, 1, 0,    0 ],
+                    [ 0, 0, -0.2, 0 ],
+                    [ 0, 0, 2,    1 ]
+                ] );
+                vertices = cube;
+                indices = cube_ind;
+                scale = 200;
+                shape = 1;
+                init();
+                return false;
+            } );
+            init();
+        </script>
+    </body>
+</html>
