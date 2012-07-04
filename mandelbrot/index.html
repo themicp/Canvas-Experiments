@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Mandelbrot</title>
+        <style type='text/css'>
+            body {
+                margin: 0;
+            }
+            canvas {
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id='canvas' width='500px' height='500px'></canvas>
+        <script type='text/javascript'>
+            var ctx = document.getElementById( 'canvas' ).getContext( '2d' );   
+            ctx.translate( 250, 250 );
+            ctx.scale( 10, 10 );
+            ctx.strokeStyle = "red";
+            ctx.fillStyle = "red";
+            var inMandelbrot, c, current;
+            function Complex ( re, im ) {
+                this.re = re;
+                this.im = im;
+                this.complex = true;
+                this.length = Math.sqrt( this.re * this.re + this.im * this.im );
+                this.add = function( a ) {
+                    var real, imag;
+                    if ( a != undefined ) {
+                        if ( a.complex ) {
+                            real = this.re + a.re;
+                            imag = this.im + a.im;
+                        }
+                        else {
+                            real = this.re + a;
+                            imag = this.im;
+                        }
+                        return new Complex( real, imag );
+                    }
+                }
+                this.square = function() {
+                    var real, img;
+                    real = this.re * this.re - this.im * this.im;
+                    img = this.im * this.re + this.re * this.im;
+                    return new Complex( real, img );
+                }
+            }
+            function next( z, c ) {
+                var square = z.complex ? z.square() : z * z;
+                return c.add( square );
+            }
+            for ( i = -10; i <= 10; ++i ) {
+                for ( j = 10; j >= -10; --j ) {
+                    c = new Complex( i, j );
+                    current = 0;
+                    inMandelbrot = true;
+                    for ( k = 0; k < 20; ++k ) {
+                        current = next( current, c );
+                        if ( current.length > 2 ) {
+                            inMandelbrot = false;
+                        }
+                    }
+                    if ( inMandelbrot ) {
+                        ctx.fillRect( i, j, 1, 1 );
+                        ctx.stroke();
+                    }
+                }
+            }
+        </script>
+    </body>
+</html>
