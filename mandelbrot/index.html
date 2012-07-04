@@ -5,25 +5,25 @@
         <style type='text/css'>
             body {
                 margin: 0;
+                background-color: #010661;
             }
             canvas {
+                display: block;
+                margin: 0 auto 0 auto;
             }
         </style>
     </head>
     <body>
-        <canvas id='canvas' width='500px' height='500px'></canvas>
+        <canvas id='canvas' width='600px' height='600px'></canvas>
         <script type='text/javascript'>
             var ctx = document.getElementById( 'canvas' ).getContext( '2d' );   
-            ctx.translate( 250, 250 );
-            ctx.scale( 10, 10 );
-            ctx.strokeStyle = "red";
-            ctx.fillStyle = "red";
+            ctx.translate( 300, 300 );
+            ctx.scale( 150, 150 );
             var inMandelbrot, c, current;
             function Complex ( re, im ) {
                 this.re = re;
                 this.im = im;
                 this.complex = true;
-                this.length = Math.sqrt( this.re * this.re + this.im * this.im );
                 this.add = function( a ) {
                     var real, imag;
                     if ( a != undefined ) {
@@ -45,23 +45,28 @@
                     return new Complex( real, img );
                 }
             }
+            function length( z )  {
+                return Math.sqrt( z.re * z.re + z.im * z.im );
+            }
             function next( z, c ) {
                 var square = z.complex ? z.square() : z * z;
                 return c.add( square );
             }
-            for ( i = -10; i <= 10; ++i ) {
-                for ( j = 10; j >= -10; --j ) {
+            for ( i = -2; i <= 2; i += 0.006 ) {
+                for ( j = 2; j >= -2; j -= 0.006 ) {
                     c = new Complex( i, j );
                     current = 0;
                     inMandelbrot = true;
-                    for ( k = 0; k < 20; ++k ) {
+                    for ( k = 0; k < 100; ++k ) {
                         current = next( current, c );
-                        if ( current.length > 2 ) {
+                        if ( length( current ) > 2 ) {
                             inMandelbrot = false;
+                            break;
                         }
                     }
                     if ( inMandelbrot ) {
-                        ctx.fillRect( i, j, 1, 1 );
+                        ctx.fillStyle = "white";
+                        ctx.fillRect( i, j, 0.006, 0.006 );
                         ctx.stroke();
                     }
                 }

@@ -15,10 +15,10 @@
         <script type="text/javascript" src='js/glMatrix-0.9.5.min.js'></script>
         <script type="text/javascript" src='js/webgl-utils.js'></script>
         <script type="text/javascript" src='js/network.js'></script>
-        <script type="text/javascript" src='js/cube.js'></script>
+        <script type="text/javascript" src='js/teapot.js'></script>
     </head>
     <body>
-        <canvas width='500' height='500' id='canvas' ></canvas>
+        <canvas width='800' height='800' id='canvas' ></canvas>
         <script type='text/javascript'>
             var gl, canvas, shaderProgram;
             var vertexShader, fragmentShader;
@@ -113,31 +113,31 @@
                 gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
                 gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( vertices ), gl.STATIC_DRAW );
                 vertexBuffer.itemSize = 3;
-                vertexBuffer.numItems = 24;
+                vertexBuffer.numItems = vertices.length / 3;
 
                 vertexColorBuffer = gl.createBuffer();
                 gl.bindBuffer( gl.ARRAY_BUFFER, vertexColorBuffer );
                 gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( colors ), gl.STATIC_DRAW );
                 vertexColorBuffer.itemSize = 4;
-                vertexColorBuffer.numItems = 24;
+                vertexColorBuffer.numItems = vertices.length / 3;
 
                 indexBuffer = gl.createBuffer(); 
                 gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, indexBuffer );
                 gl.bufferData( gl.ELEMENT_ARRAY_BUFFER, new Uint16Array( indices ), gl.STATIC_DRAW );
                 indexBuffer.itemSize = 1;
-                indexBuffer.numItems = 36;
+                indexBuffer.numItems = indices.length;
             }
             function drawScene() {
                 gl.viewport( 0, 0, gl.viewportWidth, gl.viewportHeight );
                 gl.clear( gl.COLOR_BUFFER_BIT | gl.BUFFER_BIT );
 
-                mat4.perspective( 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, project );
+                mat4.perspective( 100, gl.viewportWidth / gl.viewportHeight, 0.1, 200.0, project );
 
                 mat4.identity( move );
 
-                mat4.translate( move, [0.0, 0.0, -5.0] );
+                mat4.translate( move, [0.0, 0.0, -90.0] );
                 mvPushMatrix();
-                mat4.rotate( move, degToRad( theta ), [1, 1, 0] );
+                mat4.rotate( move, degToRad( theta ), [5, 1, 0] );
 
                 gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
                 gl.vertexAttribPointer( shaderProgram.position, vertexBuffer.itemSize, gl.FLOAT, false, 0, 0 );
