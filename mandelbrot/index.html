@@ -17,9 +17,13 @@
         <canvas id='canvas' width='600px' height='600px'></canvas>
         <script type='text/javascript'>
             var ctx = document.getElementById( 'canvas' ).getContext( '2d' );   
-            ctx.translate( 300, 300 );
-            ctx.scale( 150, 150 );
-            var inMandelbrot, c, current;
+            var W = 600;
+            var H = 600;
+            ctx.fillStyle = "#010661";
+            ctx.fillRect( 0, 0, W, H );
+            ctx.translate( W / 2, H / 2 );
+            ctx.scale( W / 4, H / 4 );
+            var inMandelbrot, c, current, shadow;
             function Complex ( re, im ) {
                 this.re = re;
                 this.im = im;
@@ -57,17 +61,29 @@
                     c = new Complex( i, j );
                     current = 0;
                     inMandelbrot = true;
+                    shadow = true;
                     for ( k = 0; k < 100; ++k ) {
                         current = next( current, c );
+                        if ( length( current ) > 2 && k < 20 ) {
+                            shadow = false;
+                        }
                         if ( length( current ) > 2 ) {
                             inMandelbrot = false;
                             break;
                         }
                     }
-                    if ( inMandelbrot ) {
-                        ctx.fillStyle = "white";
+                    if ( shadow ) {
+                        ctx.fillStyle = "rgba( 255, 165, 0, 0.3 )";
+                        ctx.fillStyle = "#D6F6F1";
                         ctx.fillRect( i, j, 0.006, 0.006 );
                         ctx.stroke();
+                    }
+                    if ( inMandelbrot ) {
+                        ctx.fillStyle = "black";
+                        ctx.fillRect( i, j, 0.02, 0.02 );
+                        ctx.stroke();
+                    }
+                    if ( inMandelbrot ) {
                     }
                 }
             }
