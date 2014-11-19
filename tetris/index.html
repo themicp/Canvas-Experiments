@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Tetris</title>
+        <style type='text/css'>
+            body {
+                background-color: #000;
+                margin: 0;
+                padding: 0;
+            }
+            canvas {
+                border: 1px solid white;
+                display: block;
+                margin: 0 auto 0 auto;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas width='300' height='600' id='canvas' ></canvas>
+        <canvas width='300' height='300' id='next' ></canvas>
+        <script type='text/javascript' >
+            var canvas = document.getElementById( 'canvas' );
+            var next_canvas = document.getElementById( 'next' );
+            var ctx = canvas.getContext( '2d' );
+            var ctx_next = next_canvas.getContext( '2d' );
+            var HEIGHT = 600;
+            var WIDTH = HEIGHT / 2;
+            var finish = false;
+        </script>
+        <script type='text/javascript' src='js/tetris.js'></script>
+        <script type='text/javascript' src='js/render.js'></script>
+        <script type='text/javascript' >
+            var y, x;
+            y = 0;
+            x = 4;
+            var accelerated = false;
+            document.body.onkeydown = function( e ) {
+                if ( !finish ) {
+                    switch ( e.keyCode ) {
+                        case 40: //down
+                            tick();
+                            break;
+                        case 39: //right
+                            ++x;
+                            if ( !valid( x, y, current, board ) ) {
+                                --x;
+                            }
+                            render();
+                            break;
+                        case 38: //up
+                            var newCurrent = rotate( current );
+                            if ( valid( x, y, newCurrent, board ) ) {
+                                current = newCurrent;
+                            }
+                            render();
+                            break;
+                        case 37: //left
+                            --x;
+                            if ( !valid( x, y, current, board ) ) {
+                                ++x;
+                            }
+                            render();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            document.body.onkeyup = function() {
+                if ( !finish ) {
+                    clearInterval( loop );
+                    loop = setInterval( render, 17 );
+                    accelerated = false;
+                }
+            }
+            var loop = setInterval( render, 17 );
+        </script>
+    </body>
+</html>
